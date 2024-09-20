@@ -1,78 +1,78 @@
 <?php
+require("conn.php");
 
 $arreglo = array(
     "sucess"=>false,
     "status"=>400,
     "data"=>"",
     "message"=>"",
-    "cant"=> 0
+    "cant"=>0
 );
 
-if($_SERVER["REQUEST_METHOD"] === "GET") {
-    //EL METODO ES GET
-    if(isset($_GET["type"]) && $_GET["type"] != ""){
-        //SI ENVIO EL PARÁMETRO TYPE
+if ($_SERVER["REQUEST_METHOD"] === "GET") {
+    if (isset($_GET["type"]) && $_GET["type"] != ""){
+        
 
         $conexion = new conexion;
         $conn = $conexion->conectar();
 
         $datos = $conn->query('SELECT * FROM empleado');
-        $resultado = $datos->fetchALL();
+        $resultados = $datos->fetchAll();
 
-        switch($_GET["type"]){
+        switch ($_GET["type"]) {
             case "json":
-                result_json($resultado);
-            break;
+                result_json($resultados);
+                break;
+            
             case "xml":
-                result_xml($resultado);
-            break;
+                result_xml($resultados);
+                break;
             default:
                 echo("Por favor, defina el tipo de resultado");
-            break;    
+            break;
         }
 
-
+echo "";
 
     }else {
         $arreglo = array(
             "sucess"=>false,
-            "status"=>array("status_code"=>412,"status_text"=> "Precondition Falled"),
+            "status"=>array("status_code"=>412,"status_text"=> "Precondition Failed"),
             "data"=>"",
-            "message"=>"Se esperaba el párametro 'type' con el tipo de resultado",
+            "message"=> "Se esperaba el parámetro 'type' con el tipo de resultado.",
             "cant"=> 0
         );
     }
-}else{
-    //NO SE ACEPTA EL MÉTODO
+}else {
     $arreglo = array(
         "sucess"=>false,
-        "status"=>array("status_code"=>405,"status_text"=> "Method Not Allowes"),
+        "status"=>array("status_code"=>405, "status_text"=> "Method Not Allowed"),
         "data"=>"",
-        "message"=>"NO SE ACEPTA EL MÉTODO",
+        "message"=> "NO SE ACEPTA EL MÉTODO",
         "cant"=> 0
     );
 }
 
 function result_json($resultado){
-    $arreglo = array(
+    $arreglo =array(
         "sucess"=>true,
-        "status"=>array("status_code"=>200,"status_text"=> "OK"),
+        "status"=>array("status_code"=>200, "status_text"=> "OK"),
         "data"=>$resultado,
-        "message"=>"",
+        "message"=> "",
         "cant"=> sizeof($resultado)
     );
 
-    header("HTTP/1.1 ".$arreglo["status"]["status_code"]." ".$arreglo["status"]["status_text"]);
-    header("Content-Typpe: Application/json");
+    header("HTTP/1.1 ".$arreglo["status"]["status_code"]. " ".$arreglo["status"]["status_text"]);
+    header("Content-Type: Application/json");
     echo(json_encode($arreglo));
 }
 
 function result_xml($resultado){
     $xml = new SimpleXMLElement("<empleados />");
-    foreach($resultado as $i => $V){
+    foreach($resultado as $i => $v){
         $subnodo = $xml->addChild("empleado");
-        $invert = array_flip($v);
-        array_walk_recursive($invert,array($submodo, 'addChild'));
+        $invertir = array_flip($v);
+        array_walk_recursive($invertir,array($subnodo, 'addChild'));
     }
     header("Content-Type: text/xml");
     echo($xml->asXML());
